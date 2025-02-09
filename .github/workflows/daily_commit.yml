@@ -2,22 +2,36 @@ name: Daily Commit
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Runs at 00:00 UTC every day
-  workflow_dispatch:  # This enables the "Run workflow" button
+    # Runs every day at 00:00 UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch:  # Manually triggerable workflow
 
 jobs:
   commit:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Create a commit with your email 23f2003311@ds.study.iitm.ac.in
-      run: |
-        git config --global user.email "23f2003311@ds.study.iitm.ac.in"
-        git config --global user.name "GitHub Actions"
-        echo "Daily commit $(date)" > daily_commit.txt
-        git add daily_commit.txt
-        git commit -m "Daily commit $(date)"
-        git push
+      # Step 2: Configure Git with your email address
+      - name: Configure Git with 23f2003311@ds.study.iitm.ac.in
+        run: |
+          git config --global user.email "23f2003311@ds.study.iitm.ac.in"
+          git config --global user.name "GitHub Actions"
+
+      # Step 3: Debugging step to check the status of the repository
+      - name: Check repository status
+        run: |
+          git status
+          git log --oneline -n 5  # Shows the last 5 commits to verify the history
+
+      # Step 4: Create a file or modify an existing file to trigger the commit
+      - name: Create or modify a file
+        run: |
+          echo "Daily commit $(date)" > daily_commit.txt
+          git add daily_commit.txt
+          git status  # To verify if the file is staged for commit
+          git commit -m "Daily commit $(date)" || echo "Nothing to commit"
+          git push || echo "Push failed, check logs for more details"
